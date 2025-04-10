@@ -1,0 +1,21 @@
+Caller: Hello, I¡¯m calling about my husband, John. He¡¯s been experiencing worsening pain in both of his eyes for about a week now. It¡¯s pretty uncomfortable, and it seems to get worse in bright light. His eyes are also looking more red than usual. What do you think might be going on?
+Nurse: That sounds really upsetting. I'm sorry to hear that John is experiencing this discomfort. Could you please tell me if there are any other symptoms he has been having?
+Caller: Well, he hasn't mentioned any other symptoms specifically, but he did say the pain is moderate to severe. I think the redness has increased as well. He usually wears glasses, and I know he has a history of glaucoma, which is controlled with medication. It¡¯s just concerning to see him in this much discomfort.
+Nurse: That sounds really concerning. I understand how difficult it must be to see him in discomfort. So, to clarify, he has been experiencing moderate to severe pain in both eyes, increased redness, and he has a history of glaucoma. Is there anything else you would like to mention about his condition?
+Caller: Um, yes, I should also mention that he¡¯s been having some difficulty driving at night lately, which I think could be related to his eye issues. He did try using artificial tears to help relieve some of the discomfort, but it doesn't seem to be working. I'm just really worried about what could be causing all of this.
+InquiryAgent: Wait, was there trauma or injury to the eye?
+Caller: No, there hasn't been any trauma or injury to his eyes that I'm aware of. It seems to have developed gradually over the past week. I'm just trying to figure out what might be happening.
+InquiryAgent: Was there surgery or procedure on the eye recently?
+Caller: No, there haven't been any recent surgeries or procedures on his eyes that I know of. It's just this gradual increase in pain and redness over the past week. I'm really at a loss here about what could be causing it.
+InquiryAgent: Wait, was there trauma or injury to the eye?
+Caller: No, there hasn't been any trauma or injury to his eyes that I'm aware of. It seems to have developed gradually over the past week. I'm just trying to figure out what might be happening.
+InquiryAgent: Have the symptoms been present for a new onset to a week, or longer than few weeks?
+Caller: The symptoms have been present for about a week. It started gradually and has been getting worse, which is why I'm so concerned.
+InquiryAgent: Is the symptom worsening in nature?
+Caller: Yes, the symptoms have been worsening. The pain has become more severe, and the redness seems to have increased as well. It's really concerning to see him struggle with this discomfort. 
+InquiryAgent: Have the symptoms been present for a new onset, or longer than few days?
+Caller: The symptoms have been present for about a week now. They started gradually and have been worsening since then. I'm really worried about what might be causing this.
+InquiryAgent: Does the patient have any other eye symptoms?
+Caller: No, he hasn't mentioned any other specific eye symptoms apart from the pain and increased redness. It's mostly just the discomfort in both eyes that's been really troubling for him.
+InquiryAgent: Your triage result is classified as Emergent, which means you need immediate medical attention. Please come to our office or go to the nearest emergency room right away. It's very important to notify the physician about your situation as soon as possible. Your health is our priority, so please act quickly.
+Caller: Okay, I understand. I¡¯ll make sure to take him in right away. Thank you for your help. [Hang Off]
