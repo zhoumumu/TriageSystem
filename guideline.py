@@ -151,7 +151,7 @@ glasses_lenses_trans = {1:('U', 'U')}
 
 ################# Decision-tree Version #############################
 basic_questions = '''
-Q1: Does the patient has any eye complaints? 
+Q1: Does the patient has any eye symtoms? 
 Yes →  Q2
 No →  Q10
 
@@ -180,7 +180,7 @@ Q7: Do you have any other symptoms in listed('vision_loss_change', 'eye_pain', '
 Yes → Should not see this condition
 No → Q8
 
-Q8: Have the symptoms been present for a new onset(within last few day), or for many weeks or months? Are the symtoms comes and goes?
+Q8: Have the symptoms been present for a new onset(within last few day), or for many weeks or months? Are the symptoms comes and goes?
 within last few days → Q9
 Longer than few weeks→ Q10
 
@@ -191,7 +191,7 @@ No →  Urgent
 Q10: Are there any other eye related problems?
 patient lost or broken glasses or contact lenses -> URGENT
 patient been judged Emergent from another physician → EMERGENT
-Other eye-related issues → Artificial transposon
+Other eye-related issues → Routine, redirect to human support
 '''
 
 vision_loss_change = '''
@@ -230,7 +230,7 @@ Q8: Is the pain worsening?
 Yes → Emergent
 No → Urgent
 
-Q9: Have the symptoms been present for a new onset, or for less than a few days, or for many months? Are the symtoms comes and goes?
+Q9: Have the symptoms been present for a new onset, or for less than a few days, or for many months? Are the sysmtoms comes and goes?
 New onset → Q10
 Few days to a week → Urgent
 Longer than few weeks→ Q16
@@ -297,7 +297,7 @@ Any no (e.g., the surgery was not recent) → Q7
 
 Q7: Have the symptoms been present for a new onset, or for less than a few days, or for many months?
 New onset → EMERGENT   
-Few days to few weeks→ Q8
+Longer than few days→ Q8
 
 Q8: Is the symptom worsening? 
 Yes→ EMERGENT  
@@ -351,29 +351,43 @@ Q6: Was there surgery or procedure on the eye in last few weeks? Are the symptom
 Both Yes→ EMERGENT
 Any no (e.g., the surgery was not recent) → Q7
 
-Q7: Have the symptoms been present for a new onset, or for less than a few days, or for many months?
-New onset to a week →  Q9
-Longer than few weeks→ Q8
+Q7:​​Are the patient currently experiencing both floaters and flashes, or just one of them?​
+Both or only flash →  Q8
+Floater →  Q13
 
-Q8: Have these flash or floaters increased in amount or size? 
-Yes→ Q9
-No→ Q12
+Q8: Have the symptoms been present for a new onset, or for less than a few days, or for many months?
+New onset to a week →  Q10
+Longer than few weeks→ Q9
 
-Q9:Is the patient myopic (nearsighted)? 
-Yes → EMERGENT
-No →  Q10
+Q9: Have these flash increased in amount or size? 
+Yes→ Q10
+No→ Q14
 
-Q10: Has the patient had LASIK or refractive surgery?  
+Q10:Is the patient myopic (nearsighted)? 
 Yes → EMERGENT
 No →  Q11
 
-Q11: Are the light flashes and floaters accompanied by shadows in the peripheral vision? 
+Q11: Has the patient had LASIK or refractive surgery?  
+Yes → EMERGENT
+No →  Q12
+
+Q12: Are the symptoms accompanied by shadows in the peripheral vision? 
 Yes → EMERGENT
 No → URGENT
 
-Q12: Are there any other symptoms?
-whatever condition → Routine
-'''
+
+Q13: Have the symptoms been present for a new onset, or for less than a few days, or for many months?
+New onset to a week →  Urgent
+Longer than few weeks→ Q14
+
+
+Q14: Have these floaters increased in amount or size? 
+Yes→ Urgent
+No→ Q12
+
+
+Q15:Are there any other symptoms?
+whatever condition → Routine, patient has to be informed of symptoms of retinal detachment and to call back if new symptoms occur'''
 
 redness_discharge = '''
 Q1: Does the patient have any eye complaints?
@@ -520,7 +534,7 @@ No →  Q8
 
 Q8: Are there bumps, lumps or swelling on the eyelid in one eye?  
 Yes →  Q9
-No → Q11
+No → Q13
 
 Q9: Is the symptom accompanied by pain or vision loss?
 Pain → Q10  

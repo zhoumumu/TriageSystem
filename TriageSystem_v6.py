@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import openai
 # from docs import patient_prompt, nurse_prompt
 from prompts import patient_prompt, nurse_prompt_without_guidance
+from util import read_profiles
 load_dotenv()
 print(os.getenv('OPENAI_BASE_URL'))
 
@@ -19,17 +20,6 @@ print(os.getenv('OPENAI_BASE_URL'))
 #             temp += line
 #     profiles.append(temp)
 #     return profiles[num_start:num_end]
-def read_profiles(num_start=1, num_end=-1, specify=None): # start from 1
-    # 1.get [start:end], closed range
-    # 2.get [start:]
-    # 3.get specified
-    # 4.get all
-    with open("profiles_reddit.txt", 'r', encoding='utf-8') as file:
-        doc = file.read()
-    profiles = doc.split("\n##########\n")
-    if specify: return [(i, profiles[i-1]) for i in specify]
-    if num_end == -1: num_end = len(profiles)
-    return [(i, profiles[i-1]) for i in range(num_start, num_end+1)]
 
 class ChatMimicApp:
     def __init__(self, nurse_sys, caller_sys):
@@ -73,7 +63,7 @@ class ChatMimicApp:
     def chat(self):
         whoisspeaking = random.randint(0, 1)
         res = ""
-        while "[Hang Off]" not in res:
+        while "[Hang Up]" not in res:
             whoisspeaking = 1 - whoisspeaking
             if whoisspeaking == 0:
                 res = self.nurse_speak()
@@ -83,7 +73,7 @@ class ChatMimicApp:
 
 
 if __name__ == "__main__":
-    for i, profile in read_profiles():
+    for i, profile in read_profiles(99):
         app = ChatMimicApp(nurse_prompt_without_guidance, patient_prompt.format(profile=profile))
         messages_history = app.chat()
         print(app.nurse_prompt_tokens, app.nurse_completion_tokens)

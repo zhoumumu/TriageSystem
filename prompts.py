@@ -29,8 +29,9 @@ print(os.getenv('OPENAI_BASE_URL'))
 # qwen-max
 # qwen-turbo
 # qwen-plus √
-# llm = ChatOpenAI(model="qwen2.5-32b-instruct")
-# llm = ChatOpenAI(model="gpt-4o")
+llm = ChatOpenAI(model="deepseek-v3")
+# llm_patient = ChatOpenAI(model="gpt-4o", api_key="sk-lthXPzxwZR2FKBIqgDKn7zwbnp7U9YMYJtoGqYE0C0bW3mt0", base_url="https://one-api.boolv.tech/v1")
+llm_converter = ChatOpenAI(model="gpt-4o-mini", api_key="sk-lthXPzxwZR2FKBIqgDKn7zwbnp7U9YMYJtoGqYE0C0bW3mt0", base_url="https://one-api.boolv.tech/v1")
 
 # class ValidSymptomFormat(BaseModel):
 #     valid_symptom: Sequence[Literal['vision_loss', 'vision_changes', 'eye_pain', 'flashes_floaters', 'redness', 'discharge', 'trauma_injury', 'photophobia', 
@@ -53,7 +54,7 @@ semantic_convertion_prompt = ChatPromptTemplate.from_messages([
      '''),
     ("human", "Message: \n\n {message}"),
 ])
-# symptom_converter = semantic_convertion_prompt | llm.with_structured_output(MainSymptomFormat)
+symptom_converter = semantic_convertion_prompt | llm_converter.with_structured_output(MainSymptomFormat)
 
 
 # patient_prompt = ''' You are calling an ophthalmology triage nurse for triage advice (Whether you need to see a doctor immediately), based on your self-description provided below.
@@ -69,7 +70,7 @@ semantic_convertion_prompt = ChatPromptTemplate.from_messages([
 #         EXAMPLE QUESTIONS.
 #             • Symptom-Related Question: “My wife has noticed a sudden increase in floaters in their vision. Could this indicate something serious?”
 #             • Care Options Question: “Based on my symptoms, should I come in for an appointment, or can I monitor this at home?”
-#     6.If you've received your triage advice, just send a single "[Hang Off]" to end the conversation.
+#     6.If you've received your triage advice, just send a single "[Hang Up]" to end the conversation.
 # '''
 # Abandoned:
 # If any critical information is missing (e.g., onset, duration, frequency), please assume and provide the relevant details based on common patterns for similar conditions. This will ensure that the nurse has enough information to properly assess the situation.
@@ -78,15 +79,14 @@ You are a caller contacting an ophthalmology triage nurse. You have no medical k
 Don't ask too many questions at one time; ask in multiple conversation rounds. Respond briefly in 1-2 sentences, focusing on your main concerns and why you're calling. Keep it short and to the point, just like in a real phone conversation.
 When describing your symptoms, incorporate details from your self-description and adjust your tone or wording based on your personality. Be flexible and natural in your explanation.
 Avoid repeatedly asking whether you need to see a doctor immediately and don't ask the same question over and over again.Don't repeat what you've already said unless asked
-If you've received your triage advice, end the call with a single "[Hang Off]".
+If you've received your triage advice, end the call with a single "[Hang Up]".
 Self-Description:
 {profile}
 '''
-# llm2 = ChatOpenAI(model="gpt-4o", api_key="sk-lthXPzxwZR2FKBIqgDKn7zwbnp7U9YMYJtoGqYE0C0bW3mt0", base_url="https://one-api.boolv.tech/v1")
-# patient_agent = ChatPromptTemplate.from_messages([
-#     ("system", patient_prompt),
-#     ("human", "Chat History: {messages}")
-#     ]) | llm2
+patient_agent = ChatPromptTemplate.from_messages([
+    ("system", patient_prompt),
+    ("human", "Chat History: {messages}")
+    ]) | llm
 
 
 triage_prompt = '''You are a nurse who need to say natural words to makes triage recommendations according to the triage result.
@@ -95,10 +95,10 @@ triage_prompt = '''You are a nurse who need to say natural words to makes triage
     If it's "ROUTINE", let the patient schedule next available routine appointment time. Tell patient to call back if symptoms get worse or vision becomes impaired before appointment.
     Tell patient to call back if symptoms worsen before appointment.
 '''
-# recommendator = ChatPromptTemplate.from_messages([
-    # ("system", triage_prompt),
-    # ("human", "The triage result is: {level}")
-    # ]) | llm | StrOutputParser()
+recommendator = ChatPromptTemplate.from_messages([
+    ("system", triage_prompt),
+    ("human", "The triage result is: {level}")
+    ]) | llm | StrOutputParser()
             
 
 nurse_prompt = '''
@@ -109,7 +109,7 @@ nurse_prompt = '''
     1.If the caller doesn't mentioned any symptom on their own initiative, ask about the patient's main discomforts.
     2.If the patient asks for diagnosis or ask about specific medical advices, tell the patient you're not qualified to talk about that and maybe he can see a doctor for the answers. \
     3.If any new symtom is mentioned, just send a single "[Inquiry]" to handing over the conversation to the doctor, don't say anything else. \
-    4.If the doctor has given the triage recommendation, just send a single "[Hang Off]" to end the conversation.
+    4.If the doctor has given the triage recommendation, just send a single "[Hang Up]" to end the conversation.
 '''
 nurse_prompt = '''
 You are a "Telephone Triage Nurse" tasked with assisting patients by following under "Decision Procedure" to determine the urgency of their symptoms.
@@ -136,10 +136,10 @@ following below format
 Decision Procedure:
 {decision_tree_curr}
 '''
-# nurse_agent = ChatPromptTemplate.from_messages([
-#     ("system", nurse_prompt),
-#     ("human", "Chat History: {messages}")
-#     ]) | llm
+nurse_agent = ChatPromptTemplate.from_messages([
+    ("system", nurse_prompt),
+    ("human", "Chat History: {messages}")
+    ]) | llm
 
 nurse_prompt_without_guidance = '''
 You are a triage nurse conducting a telephone consultation with a patient. Your primary task is to systematically inquire about every eye symptom. You need to comply with the following requirements:
@@ -151,3 +151,14 @@ You are a triage nurse conducting a telephone consultation with a patient. Your 
 Now please begin to complete your task
 6.After collecting all the information, make triage and give schedule advice: Emergent (seek immediate medical attention), Urgent (schedule an appointment within 24 hours), Routine (schedule an appointment at the next available time that is convenient).
 '''
+
+validation_prompt = "You are an AI nurse specializing in ophthalmic triage.You are given the \
+patient's symptoms and three possible answer choices. Only \
+one of the choices is correct. Select the correct choice based on the guildline, and give the \
+answer as a short response. Do not explain.\
+\
+Symptoms: {main_complain} \
+\
+Guidelines: {guideline} \
+\
+Choices: Emergent / Urgent / Routine"

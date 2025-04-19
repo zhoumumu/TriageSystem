@@ -8,12 +8,7 @@ from langgraph.graph import END, StateGraph, START
 
 from prompts import patient_agent, nurse_agent, recommendator, symptom_converter
 from guideline import basic_questions, switcher
-#TODO
-# unclosed logic:
-#     what if symptom out of the main range occur, decision tree goes to Q6 while no valid symptom is recognized and updated to this tree
-#     what if Q1 has other condition
-# 1.分诊结果不稳定
-# 2.不问诊就分诊
+from util import read_profiles
 
 class AgentState(TypedDict): # data stream in the graph, input of each node
     all_messages: Annotated[Sequence[BaseMessage], operator.add]
@@ -23,18 +18,6 @@ class AgentState(TypedDict): # data stream in the graph, input of each node
     decision_tree_curr: Annotated[str, "guide of current sympton"]
     inquiry_progress: Dict
     URGENCY_LEVEL: str
-
-def read_profiles(num_start=1, num_end=-1, specify=None): # start from 1
-    # 1.get [start:end], closed range
-    # 2.get [start:]
-    # 3.get specified
-    # 4.get all
-    with open("profiles_reddit.txt", 'r', encoding='utf-8') as file:
-        doc = file.read()
-    profiles = doc.split("\n##########\n")
-    if specify: return [(i, profiles[i-1]) for i in specify]
-    if num_end == -1: num_end = len(profiles)
-    return [(i, profiles[i-1]) for i in range(num_start, num_end+1)]
 
 def triage(inquiry_progress): #get the most severe level as the triage result
     if VERBOSE: print("\nInquiry Results:")
@@ -136,7 +119,7 @@ def caller_edge_mapping_func(state: AgentState):
 
 VERBOSE = False
 if __name__ == "__main__":
-    for i, profile in read_profiles(num_start=100):
+    for i, profile in read_profiles(16, 99):
         workflow = StateGraph(AgentState)
         workflow.add_node("Nurse", nurse_node)
         workflow.add_node("Caller", patient_node)
@@ -158,7 +141,7 @@ if __name__ == "__main__":
                 ret += s[name]['messages'][-1].content+'\n\n'
         ret += "Triage Result: "+s[name]['URGENCY_LEVEL']
 
-        with open("reddit_qwen2.5-32b-instruct/reddit_%d_%s.txt"%(i, s[name]['URGENCY_LEVEL']), "w") as file:
+        with open("reddit_dsv3/reddit_%d_%s.txt"%(i, s[name]['URGENCY_LEVEL']), "w") as file:
             file.write(ret)
         del(graph)
         del(workflow)
