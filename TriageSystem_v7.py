@@ -119,7 +119,7 @@ def caller_edge_mapping_func(state: AgentState):
 
 VERBOSE = False
 if __name__ == "__main__":
-    for i, profile in read_profiles(16, 99):
+    for i, profile in read_profiles(101):
         workflow = StateGraph(AgentState)
         workflow.add_node("Nurse", nurse_node)
         workflow.add_node("Caller", patient_node)
@@ -141,7 +141,7 @@ if __name__ == "__main__":
                 ret += s[name]['messages'][-1].content+'\n\n'
         ret += "Triage Result: "+s[name]['URGENCY_LEVEL']
 
-        with open("reddit_dsv3/reddit_%d_%s.txt"%(i, s[name]['URGENCY_LEVEL']), "w") as file:
+        with open("reddit_4onurse+dspatient/reddit_%d_%s.txt"%(i, s[name]['URGENCY_LEVEL']), "w") as file:
             file.write(ret)
         del(graph)
         del(workflow)

@@ -29,9 +29,8 @@ print(os.getenv('OPENAI_BASE_URL'))
 # qwen-max
 # qwen-turbo
 # qwen-plus √
-llm = ChatOpenAI(model="deepseek-v3")
-# llm_patient = ChatOpenAI(model="gpt-4o", api_key="sk-lthXPzxwZR2FKBIqgDKn7zwbnp7U9YMYJtoGqYE0C0bW3mt0", base_url="https://one-api.boolv.tech/v1")
-llm_converter = ChatOpenAI(model="gpt-4o-mini", api_key="sk-lthXPzxwZR2FKBIqgDKn7zwbnp7U9YMYJtoGqYE0C0bW3mt0", base_url="https://one-api.boolv.tech/v1")
+llm = ChatOpenAI(model="deepseek-v3", temperature=0.2)
+llm_2 = ChatOpenAI(model="gpt-4o", api_key="sk-lthXPzxwZR2FKBIqgDKn7zwbnp7U9YMYJtoGqYE0C0bW3mt0", base_url="https://one-api.boolv.tech/v1")
 
 # class ValidSymptomFormat(BaseModel):
 #     valid_symptom: Sequence[Literal['vision_loss', 'vision_changes', 'eye_pain', 'flashes_floaters', 'redness', 'discharge', 'trauma_injury', 'photophobia', 
@@ -54,7 +53,7 @@ semantic_convertion_prompt = ChatPromptTemplate.from_messages([
      '''),
     ("human", "Message: \n\n {message}"),
 ])
-symptom_converter = semantic_convertion_prompt | llm_converter.with_structured_output(MainSymptomFormat)
+symptom_converter = semantic_convertion_prompt | llm_2.with_structured_output(MainSymptomFormat)
 
 
 # patient_prompt = ''' You are calling an ophthalmology triage nurse for triage advice (Whether you need to see a doctor immediately), based on your self-description provided below.
@@ -139,7 +138,7 @@ Decision Procedure:
 nurse_agent = ChatPromptTemplate.from_messages([
     ("system", nurse_prompt),
     ("human", "Chat History: {messages}")
-    ]) | llm
+    ]) | llm_2
 
 nurse_prompt_without_guidance = '''
 You are a triage nurse conducting a telephone consultation with a patient. Your primary task is to systematically inquire about every eye symptom. You need to comply with the following requirements:
