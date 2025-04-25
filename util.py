@@ -6,7 +6,7 @@ def read_profiles(num_start=1, num_end=-1, specify=None): # start from 1
     # 2.get [start:]
     # 3.get specified
     # 4.get all
-    with open("profiles_reddit.txt", 'r', encoding='utf-8') as file:
+    with open("profiles_reddi-train.txt", 'r', encoding='utf-8') as file:
         doc = file.read()
     profiles = doc.split("\n##########\n")
     if specify: return [(i, profiles[i-1]) for i in specify]
@@ -43,36 +43,36 @@ def read_profiles(num_start=1, num_end=-1, specify=None): # start from 1
 # search_and_rename_files("prompt_4o")
 
 ################## check accuracy
-df = pd.read_excel('add_time_filtered_reddit_info.xlsx')
-answer = df['分诊分级'].tolist()
-pred = sorted(
-    os.listdir('reddit_4onurse+dspatient'),
-    # key=lambda x: os.path.getmtime(os.path.join('reddit_qwen2.5-32b-instruct', x)),
-    key=lambda x: int(x.split('_')[1]),
-    reverse=False
-)
-# print(pred)
-pred = [p.split('_')[-1][:-4] for p in pred]
-# print(answer)
-correct = 0
-wrong = []
-for i in range(101):
-    if answer[i][0] == pred[i][0]: correct += 1
-    else: wrong.append(i)
-print(correct)
-print(wrong)
+# df = pd.read_excel('add_time_filtered_reddit_info.xlsx')
+# answer = df['分诊分级'].tolist()
+# pred = sorted(
+#     os.listdir('reddit_4onurse+dspatient'),
+#     # key=lambda x: os.path.getmtime(os.path.join('reddit_qwen2.5-32b-instruct', x)),
+#     key=lambda x: int(x.split('_')[1]),
+#     reverse=False
+# )
+# # print(pred)
+# pred = [p.split('_')[-1][:-4] for p in pred]
+# # print(answer)
+# correct = 0
+# wrong = []
+# for i in range(101):
+#     if answer[i][0] == pred[i][0]: correct += 1
+#     else: wrong.append(i)
+# print(correct)
+# print(wrong)
 #qwen: [8, 10, 11, 12, 14, 15, 17, 19, 25, 26, 29, 32, 34, 36, 37, 38, 39, 41, 42, 47, 48, 53, 61, 65, 66, 67, 71, 72, 73, 74, 80, 82, 84, 88, 89, 91, 95, 96, 97, 100]
 #gpt_4o pure prompt: [0, 6, 7, 9, 10, 12, 13, 14, 16, 17, 19, 20, 23, 24, 25, 26, 28, 29, 31, 32, 33, 36, 38, 40, 41, 42, 43, 45, 48, 50, 56, 58, 61, 62, 63, 64, 65, 66, 68, 69, 70, 72, 73, 77, 78, 80, 81, 82, 83, 84, 85, 86, 88, 89, 90, 91, 95, 99]
 #dsv3 + 4o-mini converter: [7, 8, 10, 11, 12, 14, 15, 17, 21, 23, 26, 29, 31, 32, 34, 35, 36, 37, 38, 40, 41, 42, 43, 45, 48, 54, 60, 63, 65, 67, 76, 80, 82, 83, 87, 92, 93]
 #reddit_4onurse+dspatient:[0, 6, 8, 9, 11, 12, 14, 15, 19, 25, 26, 29, 30, 31, 32, 34, 36, 40, 41, 43, 45, 62, 63, 67, 68, 70, 76, 79, 82, 83, 90, 91, 92, 93, 99, 100]
 
 ################# test API key
-# from openai import OpenAI
 # from dotenv import load_dotenv
 # import os
 # load_dotenv()
 # print(os.getenv('OPENAI_BASE_URL'))
 # # Way 1
+# from openai import OpenAI
 # client = OpenAI()
 # completion = client.chat.completions.create(
 #   model="deepseek-v3",
@@ -84,41 +84,10 @@ print(wrong)
 #   ]
 # )
 # print(completion)
-# Way 2
+# # Way 2
 # from langchain_openai import ChatOpenAI
-# llm = ChatOpenAI(model='gpt-4o', api_key="", base_url="")
+# llm = ChatOpenAI(model='deepseek-v3', api_key="", base_url="")
 # print(llm.invoke("Hi, who are you"))
-# Way 3
-# import requests
-# import json
-# 使用中转链接可以和特定的API可以不必向openai发起请求，且请求无须魔法
-# 调用方式与openai官网一致，仅需修改baseurl
-# Baseurl = "xxx"
-# Skey = "xxx"
-
-# payload = json.dumps({
-#    "model": "gpt-4o",
-#    "messages": [
-#       {
-#          "role": "system",
-#          "content": "You are a helpful assistant."
-#       },
-#       {
-#          "role": "user",
-#          "content": "hello, who are you"
-#       }
-#    ]
-# })
-# headers = {
-#    'Accept': 'application/json',
-#    'Authorization': f'Bearer {Skey}',
-#    'User-Agent': 'Apifox/1.0.0 (https://apifox.com)',
-#    'Content-Type': 'application/json'
-# }
-
-# response = requests.request("POST", Baseurl, headers=headers, data=payload)
-# data = response.json()
-# print(data)
 
 ###########################level validation######################
 # from openai import OpenAI

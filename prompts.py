@@ -1,36 +1,8 @@
-from dotenv import load_dotenv
-load_dotenv()
 from typing import Literal, Sequence
-from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
 from pydantic import BaseModel
 from langchain_core.prompts import ChatPromptTemplate
-import os
-print(os.getenv('OPENAI_BASE_URL'))
-
-#Available models:
-# deepseek-v3 ×: function calling not supported
-# deepseek-r1-distill-llama-70b
-# deepseek-r1-distill-qwen-32b
-# deepseek-r1-distill-qwen-14b
-# deepseek-r1-distill-llama-8b ×: function calling not supported
-# deepseek-r1-distill-qwen-1.5b
-# deepseek-r1-distill-qwen-7b
-# deepseek-r1 ×: function calling not supported
-# qwen2.5-14b-instruct ×
-# qwen2.5-32b-instruct √
-# qwen2.5-72b-instruct √
-# qwen2.5-coder-32b-instruct ×
-# qwen2.5-math-72b-instruct ×: bad output, short input_len
-# qwen-72b-chat ×
-# qwen-14b-chat ×
-# qwen-long
-# qwen-max-longcontext
-# qwen-max
-# qwen-turbo
-# qwen-plus √
-llm = ChatOpenAI(model="deepseek-v3", temperature=0.2)
-llm_2 = ChatOpenAI(model="gpt-4o", api_key="sk-lthXPzxwZR2FKBIqgDKn7zwbnp7U9YMYJtoGqYE0C0bW3mt0", base_url="https://one-api.boolv.tech/v1")
+from create_llm import llm, llm_2
 
 # class ValidSymptomFormat(BaseModel):
 #     valid_symptom: Sequence[Literal['vision_loss', 'vision_changes', 'eye_pain', 'flashes_floaters', 'redness', 'discharge', 'trauma_injury', 'photophobia', 
@@ -75,10 +47,10 @@ symptom_converter = semantic_convertion_prompt | llm_2.with_structured_output(Ma
 # If any critical information is missing (e.g., onset, duration, frequency), please assume and provide the relevant details based on common patterns for similar conditions. This will ensure that the nurse has enough information to properly assess the situation.
 patient_prompt = '''
 You are a caller contacting an ophthalmology triage nurse. You have no medical knowledge. Your goal is to seek appropriate triage advice for the triage advice (whether you need to see a doctor immediately) based on your self-description provided below.
-Don't ask too many questions at one time; ask in multiple conversation rounds. Respond briefly in 1-2 sentences, focusing on your main concerns and why you're calling. Keep it short and to the point, just like in a real phone conversation.
+Talk like in a real phone conversation, you won't say all the stuff at one round to keep the words short and easy for others to catch your meaning.
+Don't ask too many questions at one time, respond briefly in 1-2 sentences, don't remember your main concerns and why you're calling.
 When describing your symptoms, incorporate details from your self-description and adjust your tone or wording based on your personality. Be flexible and natural in your explanation.
 Avoid repeatedly asking whether you need to see a doctor immediately and don't ask the same question over and over again.Don't repeat what you've already said unless asked
-If you've received your triage advice, end the call with a single "[Hang Up]".
 Self-Description:
 {profile}
 '''
@@ -100,16 +72,16 @@ recommendator = ChatPromptTemplate.from_messages([
     ]) | llm | StrOutputParser()
             
 
-nurse_prompt = '''
-    You are a ophthalmic triaging nurse agent assisting a doctor who's conducting a telephone consultation from a patient or his relevant. \
-    You need to express empathy and recognize the impact may have on the patient's life. For instance, say: That sounds really upsetting. \
-    You need to repeat the question once the caller misses answering your question. \
-    Key Points: \
-    1.If the caller doesn't mentioned any symptom on their own initiative, ask about the patient's main discomforts.
-    2.If the patient asks for diagnosis or ask about specific medical advices, tell the patient you're not qualified to talk about that and maybe he can see a doctor for the answers. \
-    3.If any new symtom is mentioned, just send a single "[Inquiry]" to handing over the conversation to the doctor, don't say anything else. \
-    4.If the doctor has given the triage recommendation, just send a single "[Hang Up]" to end the conversation.
-'''
+# nurse_prompt = '''
+#     You are a ophthalmic triaging nurse agent assisting a doctor who's conducting a telephone consultation from a patient or his relevant. \
+#     You need to express empathy and recognize the impact may have on the patient's life. For instance, say: That sounds really upsetting. \
+#     You need to repeat the question once the caller misses answering your question. \
+#     Key Points: \
+#     1.If the caller doesn't mentioned any symptom on their own initiative, ask about the patient's main discomforts.
+#     2.If the patient asks for diagnosis or ask about specific medical advices, tell the patient you're not qualified to talk about that and maybe he can see a doctor for the answers. \
+#     3.If any new symtom is mentioned, just send a single "[Inquiry]" to handing over the conversation to the doctor, don't say anything else. \
+#     4.If the doctor has given the triage recommendation, just send a single "[Hang Up]" to end the conversation.
+# '''
 nurse_prompt = '''
 You are a "Telephone Triage Nurse" tasked with assisting patients by following under "Decision Procedure" to determine the urgency of their symptoms.
 Your questions will only be 1-2sentences in length. Remember what the patient said.

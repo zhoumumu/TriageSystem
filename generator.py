@@ -308,9 +308,11 @@ Key Points:
     The generated profile should be reasonable. Occupation needs to match education level.
 '''.format(generator_guideline)
 
-import pandas as pd
-import re, os
-df = pd.read_excel('add_time_filtered_reddit_info.xlsx')
+
+######################generate 100-sample testset#################
+# import pandas as pd
+# import re, os
+# df = pd.read_excel('add_time_filtered_reddit_info.xlsx')
 # def filter_condition(row):
 #     return isinstance(row['患者诉求'], float) or "症状分诊" in str(row['患者诉求'])
 
@@ -330,3 +332,33 @@ df = pd.read_excel('add_time_filtered_reddit_info.xlsx')
 # print(filtered_df.shape)
 # output_file = r'filtered_reddit_info.xlsx'
 # filtered_df.to_excel(output_file, index=False)
+
+
+#################preprocess 900-sample testset##########################
+import pandas as pd
+import re
+from pydantic import BaseModel
+from typing import Literal, Sequence
+from langchain_core.prompts import ChatPromptTemplate
+from create_llm import llm_2
+
+class ValidFormat(BaseModel):
+    content: Literal['yes', 'no']
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "Determin whether the patient has any eye symptom? Return yes or no."),
+    ("human", "Patient's condition: \n\n {profile}"),
+])
+preprocess_filter = prompt | llm_2.with_structured_output(ValidFormat)
+
+df = pd.read_excel('dataset_reddit-scraper.xlsx')
+url_pattern = re.compile(r'https?://\S+|www\.\S+')
+count = 0
+with open('profiles_reddit-train.txt', 'a+', encoding='utf-8') as file:
+    for _, row in df[282:].iterrows():
+        profile = row['title']+'\n'+row['body']
+        profile = re.sub(url_pattern, '', profile)
+        judge = preprocess_filter.invoke({"profile": profile})
+        if judge.content == "yes":
+            file.write(profile+"\n##########\n")
+            count += 1
+print(count)

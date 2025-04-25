@@ -151,7 +151,7 @@ glasses_lenses_trans = {1:('U', 'U')}
 
 ################# Decision-tree Version #############################
 basic_questions = '''
-Q1: Does the patient has any eye symtoms? 
+Q1: Does the patient has any eye complaint? 
 Yes →  Q2
 No →  Q10
 
@@ -184,9 +184,9 @@ Q8: Have the symptoms been present for a new onset(within last few day), or for 
 within last few days → Q9
 Longer than few weeks→ Q10
 
-Q9: Is the symptom severe and worsening? 
-Yes → Emergent
-No →  Urgent
+Q9: Is the symptom severe or worsening? 
+Yes → Urgent
+No →  Routine
 
 Q10: Are there any other eye related problems?
 patient lost or broken glasses or contact lenses -> URGENT
@@ -383,7 +383,7 @@ Longer than few weeks→ Q14
 
 Q14: Have these floaters increased in amount or size? 
 Yes→ Urgent
-No→ Q12
+No→ Q15
 
 
 Q15:Are there any other symptoms?
