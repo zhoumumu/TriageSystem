@@ -2,7 +2,7 @@ from typing import Literal, Sequence
 from langchain_core.output_parsers import StrOutputParser
 from pydantic import BaseModel
 from langchain_core.prompts import ChatPromptTemplate
-from create_llm import llm, llm_2
+from create_llm import llm
 
 # class ValidSymptomFormat(BaseModel):
 #     valid_symptom: Sequence[Literal['vision_loss', 'vision_changes', 'eye_pain', 'flashes_floaters', 'redness', 'discharge', 'trauma_injury', 'photophobia', 
@@ -25,7 +25,7 @@ semantic_convertion_prompt = ChatPromptTemplate.from_messages([
      '''),
     ("human", "Message: \n\n {message}"),
 ])
-symptom_converter = semantic_convertion_prompt | llm_2.with_structured_output(MainSymptomFormat)
+symptom_converter = semantic_convertion_prompt | llm.with_structured_output(MainSymptomFormat)
 
 
 # patient_prompt = ''' You are calling an ophthalmology triage nurse for triage advice (Whether you need to see a doctor immediately), based on your self-description provided below.
@@ -46,12 +46,15 @@ symptom_converter = semantic_convertion_prompt | llm_2.with_structured_output(Ma
 # Abandoned:
 # If any critical information is missing (e.g., onset, duration, frequency), please assume and provide the relevant details based on common patterns for similar conditions. This will ensure that the nurse has enough information to properly assess the situation.
 patient_prompt = '''
-You are a caller contacting an ophthalmology triage nurse. You have no medical knowledge. Your goal is to seek appropriate triage advice for the triage advice (whether you need to see a doctor immediately) based on your self-description provided below.
-Talk like in a real phone conversation, you won't say all the stuff at one round to keep the words short and easy for others to catch your meaning.
-Don't ask too many questions at one time, respond briefly in 1-2 sentences, don't remember your main concerns and why you're calling.
-When describing your symptoms, incorporate details from your self-description and adjust your tone or wording based on your personality. Be flexible and natural in your explanation.
-Avoid repeatedly asking whether you need to see a doctor immediately and don't ask the same question over and over again.Don't repeat what you've already said unless asked
-Self-Description:
+You are a patient calling to seek appropriate triage advice for the triage advice (whether you need to see a doctor immediately)
+based on the symptoms mentioned in [Patient's condition] provided below.
+-While the [Patient's condition] might mention other issues, during this call, your focus is solely on understanding if your eye symptoms require immediate medical attention.
+-Talk like in a real phone conversation, you won't say all the stuff at one round to keep the words short and easy for others to catch your meaning.
+-Don't ask too many questions at one time, respond briefly in 1-2 sentences, your main concerns is your eye symptom now.
+-You have no medical knowledge. When describing your symptoms, incorporate details from your self-description and adjust your tone or wording based on your personality. Be flexible and natural in your explanation.
+-Don't repeat what you've already said unless being asked. Avoid repeatedly asking whether you need to see a doctor immediately and don't ask the same question over and over again.
+
+[Patient's condition]:
 {profile}
 '''
 patient_agent = ChatPromptTemplate.from_messages([
@@ -65,6 +68,7 @@ triage_prompt = '''You are a nurse who need to say natural words to makes triage
     If it's "URGENT", the patient should see doctor within 24 hours. Consult with ophthalmologist if in doubt. Err on side of safety.
     If it's "ROUTINE", let the patient schedule next available routine appointment time. Tell patient to call back if symptoms get worse or vision becomes impaired before appointment.
     Tell patient to call back if symptoms worsen before appointment.
+    You should not tell stuff like "according to the triage result", just give advice.
 '''
 recommendator = ChatPromptTemplate.from_messages([
     ("system", triage_prompt),
@@ -110,7 +114,7 @@ Decision Procedure:
 nurse_agent = ChatPromptTemplate.from_messages([
     ("system", nurse_prompt),
     ("human", "Chat History: {messages}")
-    ]) | llm_2
+    ]) | llm
 
 nurse_prompt_without_guidance = '''
 You are a triage nurse conducting a telephone consultation with a patient. Your primary task is to systematically inquire about every eye symptom. You need to comply with the following requirements:

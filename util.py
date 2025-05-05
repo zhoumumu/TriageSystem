@@ -6,7 +6,7 @@ def read_profiles(num_start=1, num_end=-1, specify=None): # start from 1
     # 2.get [start:]
     # 3.get specified
     # 4.get all
-    with open("profiles_reddi-train.txt", 'r', encoding='utf-8') as file:
+    with open("profiles_reddit-train.txt", 'r', encoding='utf-8') as file:
         doc = file.read()
     profiles = doc.split("\n##########\n")
     if specify: return [(i, profiles[i-1]) for i in specify]
@@ -65,6 +65,15 @@ def read_profiles(num_start=1, num_end=-1, specify=None): # start from 1
 #gpt_4o pure prompt: [0, 6, 7, 9, 10, 12, 13, 14, 16, 17, 19, 20, 23, 24, 25, 26, 28, 29, 31, 32, 33, 36, 38, 40, 41, 42, 43, 45, 48, 50, 56, 58, 61, 62, 63, 64, 65, 66, 68, 69, 70, 72, 73, 77, 78, 80, 81, 82, 83, 84, 85, 86, 88, 89, 90, 91, 95, 99]
 #dsv3 + 4o-mini converter: [7, 8, 10, 11, 12, 14, 15, 17, 21, 23, 26, 29, 31, 32, 34, 35, 36, 37, 38, 40, 41, 42, 43, 45, 48, 54, 60, 63, 65, 67, 76, 80, 82, 83, 87, 92, 93]
 #reddit_4onurse+dspatient:[0, 6, 8, 9, 11, 12, 14, 15, 19, 25, 26, 29, 30, 31, 32, 34, 36, 40, 41, 43, 45, 62, 63, 67, 68, 70, 76, 79, 82, 83, 90, 91, 92, 93, 99, 100]
+
+################# check skipped inquiry
+# skipped = []
+# for f in os.listdir("reddit_train"):
+#     with open("reddit_train/"+f, 'r') as file:
+#         content = file.read()
+#         if content.count("Nurse:") == 1: skipped.append(int(f.split('_')[1]))
+# print(skipped)
+# [108, 157, 174, 18, 203, 211, 23, 244, 250, 300, 315, 337, 397, 39, 402, 416, 423, 438, 442, 451, 461, 484, 516, 524, 529, 575, 584, 586, 58, 60, 628, 662, 675, 688, 70, 717, 718, 737, 748, 758, 773, 8]
 
 ################# test API key
 # from dotenv import load_dotenv

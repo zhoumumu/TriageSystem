@@ -32,8 +32,8 @@ def triage(inquiry_progress): #get the most severe level as the triage result
 
 
 def nurse_node(state: AgentState):
-    result = nurse_agent.invoke(state).replace("Nurse: ", '')
-    response = result.content
+    result = nurse_agent.invoke(state)
+    response = result.content.replace("Nurse: ", '').replace("\"", '')
     if VERBOSE: print(response)
     new_state = state
 
@@ -59,11 +59,11 @@ def nurse_node(state: AgentState):
                     flag_finshed = False
                     new_state["symptom_curr"] = k
                     new_state["decision_tree_curr"] = switcher[k]
-                    result = nurse_agent.invoke(new_state).replace("Nurse: ", '')
+                    result = nurse_agent.invoke(new_state)
                     
                     idx = result.content.find('Talking to the Caller:')
                     if idx == -1: break
-                    response = result.content[idx+23:]
+                    response = result.content[idx+23:].replace("Nurse: ", '').replace("\"", '')
                     level = next((l for l in ["EMERGENT", "URGENT", "ROUTINE"] if l in response), 0)
                     break # go check again whether reach the end of new symptom, if not go to position1
 
@@ -73,25 +73,25 @@ def nurse_node(state: AgentState):
             if flag_finshed or flag_finished_in_advance:
                 new_state["URGENCY_LEVEL"] = final_level
                 final_response = recommendator.invoke({"level": final_level})
-                new_state["all_messages"].append(HumanMessage(content="Nurse: "+final_response, name="Nurse"))
+                # new_state["all_messages"].append(HumanMessage(content="Nurse: "+final_response, name="Nurse"))
                 new_state["messages"].append(HumanMessage(content="Nurse: "+final_response+"\n[Hang Up]", name="Nurse"))
                 return new_state
 
         # position1
-        new_state["all_messages"].append(HumanMessage(content="Nurse: "+result.content, name="Nurse"))
+        # new_state["all_messages"].append(HumanMessage(content="Nurse: "+result.content.replace("Nurse: ", '').replace("\"", ''), name="Nurse"))
         new_state["messages"].append(HumanMessage(content="Nurse: "+response, name="Nurse"))
         return new_state 
         
     # at begining or later sometime, might doesn't do inquiry so won't find 'Talking to the Caller:'
-    new_state["all_messages"].append(HumanMessage(content="Nurse: "+result.content, name="Nurse"))
+    # new_state["all_messages"].append(HumanMessage(content="Nurse: "+result.content.replace("Nurse: ", '').replace("\"", ''), name="Nurse"))
     new_state["messages"].append(HumanMessage(content="Nurse: "+response, name="Nurse"))
     return new_state
 
 def patient_node(state):
     new_state = state
-    result = patient_agent.invoke(state).replace("Caller: ", '').replace("\"", '')
-    new_state["all_messages"] = [HumanMessage(content="Caller: "+result.content, name="Caller")]
-    new_state["messages"] = [HumanMessage(content="Caller: "+result.content, name="Caller")]
+    result = patient_agent.invoke(state)
+    # new_state["all_messages"] = [HumanMessage(content="Caller: "+result.content.replace("Caller: ", '').replace("\"", ''), name="Caller")]
+    new_state["messages"] = [HumanMessage(content="Caller: "+result.content.replace("Caller: ", '').replace("\"", ''), name="Caller")]
 
     # check new symptom every round
     new_symptoms = symptom_converter.invoke({"message": result.content})
@@ -119,7 +119,9 @@ def caller_edge_mapping_func(state: AgentState):
 
 VERBOSE = False
 if __name__ == "__main__":
-    for i, profile in read_profiles(101):
+    skipped = [662, 675, 688, 70, 717, 718, 737, 748, 758, 773, 8]
+    for i, profile in read_profiles(specify=skipped):
+        print(i)
         workflow = StateGraph(AgentState)
         workflow.add_node("Nurse", nurse_node)
         workflow.add_node("Caller", patient_node)
@@ -139,10 +141,11 @@ if __name__ == "__main__":
 
             if 'messages' in s[name]:
                 ret += s[name]['messages'][-1].content+'\n\n'
-        ret += "Triage Result: "+s[name]['URGENCY_LEVEL']
-        ret += "Detected Symptoms: "+' '.join(s[name]['inquiry_progress'].keys())
+        ret += "Triage Result: "+s[name]['URGENCY_LEVEL']+'\nDetected Symptoms: \n'
+        for k, v in s[name]['inquiry_progress'].items():
+            ret += k+': '+v+'\n'
 
-        with open("reddit_4onurse+dspatient/reddit_%d_%s.txt"%(i, s[name]['URGENCY_LEVEL']), "w") as file:
+        with open("reddit_train/reddit_%d_%s.txt"%(i, s[name]['URGENCY_LEVEL']), "w") as file:
             file.write(ret)
         del(graph)
         del(workflow)

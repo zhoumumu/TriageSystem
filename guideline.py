@@ -418,44 +418,51 @@ Any no (e.g., the surgery was not recent) → Q7
 
 Q7: Have the symptoms been present for a new onset, or for less than a few days, or for many months?
 New onset to a week →  Q8
-Longer than few weeks→ Q16
+Longer than few weeks→ Q12
 
 Q8: Is the patient a contact lens wearer?  
 Yes → EMERGENT
-No, and patient has redness → Q9
-Else → Q14
+No→ Q9
 
-Q9: Is the redness accompanied by nausea and foggy vision? 
+Q9: Are your symptoms just redness, just discharge, or both?
+Both or Only redness→ Q10
+Only discharge→ Q16
+
+Q10: Is the redness accompanied by nausea and foggy vision? 
 Yes → EMERGENT
-No → Q10
+No → Q11
 
-Q10: Is the red eye accompanied by pain?
-Yes →  Q11
-No →  Q12
+Q11: Is the red eye accompanied by pain?
+Yes →  Q12
+No →  Q13
 
-Q11: Is the pain worsening?
+Q12: Is the pain worsening?
 Yes → Emergent
 No → Urgent
 
-Q12: Is the redness accompanied by photophobia?
+Q13: Is the redness accompanied by photophobia?
 YES → URGENT
-No, and patient has discharge → Q14
-Else → Q13
+No → Q14
 
-Q13: Is the redness severe or getting worse?
+Q14: Is the redness severe or getting worse?
 YES → URGENT
 No → Q15
 
-Q14: Is the discharge accompanied by pain and vision loss?
-Yes →  Q11
-No →  Q15
+Q15:Has there been an increase in eye discharge since the eyes became red?
+Yes→ Q16
+No→ Q18
 
-Q15: Does the discharge or tearing cause the eyelids to stick together?
+Q16: Is the discharge accompanied by pain and vision loss?
+Yes →  Q12
+No →  Q17
+
+Q17: Does the discharge or tearing cause the eyelids to stick together?
 Yes → URGENT
-No → Q16
+No → Q18
 
-Q16: Are there any other symptoms?
+Q18: Are there any other symptoms?
 whatever condition → Routine
+
 '''
 
 photophobia = '''

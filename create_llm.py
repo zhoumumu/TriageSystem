@@ -25,5 +25,5 @@ from langchain_openai import ChatOpenAI
 # qwen-max
 # qwen-turbo
 # qwen-plus √
-llm = ChatOpenAI(model="qwen-plus", temperature=0.2)
-llm_2 = ChatOpenAI(model="gpt-4o-mini", api_key="sk-lthXPzxwZR2FKBIqgDKn7zwbnp7U9YMYJtoGqYE0C0bW3mt0", base_url="https://one-api.boolv.tech/v1")
+# llm = ChatOpenAI(model="qwen-plus", temperature=0.2)
+llm = ChatOpenAI(model="gpt-4o", api_key="sk-lthXPzxwZR2FKBIqgDKn7zwbnp7U9YMYJtoGqYE0C0bW3mt0", base_url="https://one-api.boolv.tech/v1")
