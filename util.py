@@ -6,9 +6,11 @@ def read_profiles(num_start=1, num_end=-1, specify=None): # start from 1
     # 2.get [start:]
     # 3.get specified
     # 4.get all
-    with open("profiles_reddit-train.txt", 'r', encoding='utf-8') as file:
+    # with open("profiles_reddit-train.txt", 'r', encoding='utf-8') as file:
+    with open("profiles_4o.txt", 'r', encoding='utf-8') as file:
         doc = file.read()
-    profiles = doc.split("\n##########\n")
+    # profiles = doc.split("\n##########\n")
+    profiles = doc.split("\n---\n")
     if specify: return [(i, profiles[i-1]) for i in specify]
     if num_end == -1: num_end = len(profiles)
     return [(i, profiles[i-1]) for i in range(num_start, num_end+1)]
@@ -74,6 +76,21 @@ def read_profiles(num_start=1, num_end=-1, specify=None): # start from 1
 #         if content.count("Nurse:") == 1: skipped.append(int(f.split('_')[1]))
 # print(skipped)
 # [108, 157, 174, 18, 203, 211, 23, 244, 250, 300, 315, 337, 397, 39, 402, 416, 423, 438, 442, 451, 461, 484, 516, 524, 529, 575, 584, 586, 58, 60, 628, 662, 675, 688, 70, 717, 718, 737, 748, 758, 773, 8]
+
+################# check restart
+# abnormal = []
+# marks = ["hi", "hey", "hello"]
+# for f in os.listdir("reddit_train"):
+#     with open("reddit_train/"+f, 'r') as file:
+#         content = file.read()
+#         count = 0
+#         for word in marks:
+#             match = re.findall(fr'\b{word}\b', content, re.IGNORECASE)
+#             count += len(match)
+#         if count > 2: abnormal.append(int(f.split('_')[1]))
+# print(abnormal)
+# [102, 109, 120, 147, 149, 154, 155, 158, 15, 160, 162, 164, 171, 177, 17, 183, 187, 199, 1, 201, 204, 208, 218, 228, 229, 233, 239, 256, 258, 25, 263, 269, 26, 270, 274, 275, 278, 282, 283, 284, 288, 291, 301, 303, 306, 313, 325, 327, 336, 341, 355, 360, 371, 375, 398, 401, 405, 410, 415, 421, 439, 43, 444, 446, 454, 460, 465, 467, 468, 475, 47, 485, 490, 492, 4, 
+# 506, 510, 526, 52, 532, 543, 545, 547, 564, 571, 57, 587, 588, 591, 605, 606, 60, 621, 624, 626, 627, 645, 654, 656, 671, 672, 674, 680, 681, 687, 688, 68, 690, 691, 697, 698, 69, 702, 704, 706, 70, 710, 712, 713, 714, 718, 721, 728, 72, 732, 747, 759, 761, 765, 77, 787, 82, 84, 97]
 
 ################# test API key
 # from dotenv import load_dotenv

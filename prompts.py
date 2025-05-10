@@ -45,22 +45,28 @@ symptom_converter = semantic_convertion_prompt | llm.with_structured_output(Main
 # '''
 # Abandoned:
 # If any critical information is missing (e.g., onset, duration, frequency), please assume and provide the relevant details based on common patterns for similar conditions. This will ensure that the nurse has enough information to properly assess the situation.
+
+# for data from reddit, add rule:
+# -While the [Patient's condition] might mention other issues, during this call, your focus is solely on understanding if your eye symptoms require immediate medical attention.
+
 patient_prompt = '''
-You are a patient calling to seek appropriate triage advice for the triage advice (whether you need to see a doctor immediately)
-based on the symptoms mentioned in [Patient's condition] provided below.
--While the [Patient's condition] might mention other issues, during this call, your focus is solely on understanding if your eye symptoms require immediate medical attention.
+You are calling to complain about the eye symptom 
+based on the symptoms mentioned in [Patient's condition] and [Chat History] provided below.
+
+Follow the rules:
 -Talk like in a real phone conversation, you won't say all the stuff at one round to keep the words short and easy for others to catch your meaning.
--Don't ask too many questions at one time, respond briefly in 1-2 sentences, your main concerns is your eye symptom now.
+-Respond briefly in 1-2 sentences.
 -You have no medical knowledge. When describing your symptoms, incorporate details from your self-description and adjust your tone or wording based on your personality. Be flexible and natural in your explanation.
--Don't repeat what you've already said unless being asked. Avoid repeatedly asking whether you need to see a doctor immediately and don't ask the same question over and over again.
 
 [Patient's condition]:
 {profile}
+
+[Chat History]:
+{messages}
+
+According to the chat history, what will you answer or ask next? (Don't output anything else but the phone call's content)
 '''
-patient_agent = ChatPromptTemplate.from_messages([
-    ("system", patient_prompt),
-    ("human", "Chat History: {messages}")
-    ]) | llm
+patient_agent = ChatPromptTemplate.from_messages([("system", patient_prompt)]) | llm
 
 
 triage_prompt = '''You are a nurse who need to say natural words to makes triage recommendations according to the triage result.
@@ -106,8 +112,7 @@ following below format
     Talking to the Caller:
 】
 3.Use layman's terms to ensure understanding (e.g., use "both sides" instead of "bilateral," "high blood pressure" instead of "hypertension," and "not cancer" instead of "benign").
-4.Empathy: Express empathy and recognize the impact the issue may have on the patient's life. For instance, say: That sounds really upsetting.
-
+4.Empathy: Express empathy and recognize the impact the issue may have on the patient's life (e.g., 'That sounds really upsetting.').
 Decision Procedure:
 {decision_tree_curr}
 '''

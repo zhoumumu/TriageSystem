@@ -1,3 +1,4 @@
+import os, glob, time
 from dotenv import load_dotenv
 load_dotenv()
 from typing import Annotated, Sequence, Dict
@@ -39,7 +40,7 @@ def nurse_node(state: AgentState):
 
     idx = result.content.find('Talking to the Caller:')
     if idx != -1:
-        response = result.content[idx+23:]
+        response = result.content[idx+23:].strip()
         # end of inquiry of current symptom
         level = next((l for l in ["EMERGENT", "URGENT", "ROUTINE"] if l in response), 0)
 
@@ -63,7 +64,7 @@ def nurse_node(state: AgentState):
                     
                     idx = result.content.find('Talking to the Caller:')
                     if idx == -1: break
-                    response = result.content[idx+23:].replace("Nurse: ", '').replace("\"", '')
+                    response = result.content[idx+23:].strip().replace("Nurse: ", '').replace("\"", '')
                     level = next((l for l in ["EMERGENT", "URGENT", "ROUTINE"] if l in response), 0)
                     break # go check again whether reach the end of new symptom, if not go to position1
 
@@ -91,7 +92,7 @@ def patient_node(state):
     new_state = state
     result = patient_agent.invoke(state)
     # new_state["all_messages"] = [HumanMessage(content="Caller: "+result.content.replace("Caller: ", '').replace("\"", ''), name="Caller")]
-    new_state["messages"] = [HumanMessage(content="Caller: "+result.content.replace("Caller: ", '').replace("\"", ''), name="Caller")]
+    new_state["messages"] = [HumanMessage(content="Caller: "+result.content.strip().replace("Caller: ", '').replace("\"", ''), name="Caller")]
 
     # check new symptom every round
     new_symptoms = symptom_converter.invoke({"message": result.content})
@@ -119,9 +120,8 @@ def caller_edge_mapping_func(state: AgentState):
 
 VERBOSE = False
 if __name__ == "__main__":
-    skipped = [662, 675, 688, 70, 717, 718, 737, 748, 758, 773, 8]
+    skipped = [364]
     for i, profile in read_profiles(specify=skipped):
-        print(i)
         workflow = StateGraph(AgentState)
         workflow.add_node("Nurse", nurse_node)
         workflow.add_node("Caller", patient_node)
@@ -130,22 +130,33 @@ if __name__ == "__main__":
         workflow.add_conditional_edges("Caller", caller_edge_mapping_func, ["Nurse", END])
         graph = workflow.compile()
         
-        ret = ""
-        for s in graph.stream(
-            {"all_messages": [], "messages": [], "inquiry_progress": {},
-                "profile": profile, "decision_tree_curr": basic_questions, "URGENCY_LEVEL": 'Routine'},# TODO: bug, profile 13, this is not updated
-            {"configurable": {"thread_id": "thread-1", "recursion_limit": 50}}
-        ):
-            name = list(s.keys())[0]
-            if VERBOSE: s[name]['messages'][-1].pretty_print()
+        try:
+            ret = ""
+            for s in graph.stream(
+                {"all_messages": [], "messages": [], "inquiry_progress": {},
+                    "profile": profile, "decision_tree_curr": basic_questions, "URGENCY_LEVEL": 'Routine'},# TODO: bug, profile 13, this is not updated
+                {"configurable": {"thread_id": "thread-1", "recursion_limit": 50}}
+            ):
+                name = list(s.keys())[0]
+                if VERBOSE: s[name]['messages'][-1].pretty_print()
 
-            if 'messages' in s[name]:
-                ret += s[name]['messages'][-1].content+'\n\n'
-        ret += "Triage Result: "+s[name]['URGENCY_LEVEL']+'\nDetected Symptoms: \n'
-        for k, v in s[name]['inquiry_progress'].items():
-            ret += k+': '+v+'\n'
+                if 'messages' in s[name]:
+                    ret += s[name]['messages'][-1].content+'\n\n'
+            ret += "Triage Result: "+s[name]['URGENCY_LEVEL']+'\nDetected Symptoms: \n'
+            for k, v in s[name]['inquiry_progress'].items():
+                ret += k+': '+v+'\n'
+        except Exception as e:
+            print(e)
+            print("broken and skip at Number", i)
+            time.sleep(60)
+            continue
 
-        with open("reddit_train/reddit_%d_%s.txt"%(i, s[name]['URGENCY_LEVEL']), "w") as file:
+        # bad_file = glob.glob("reddit_train/reddit_%d_*.txt"%i)
+        # if len(bad_file) == 1:
+        #     os.remove(bad_file[0])
+        #     print(bad_file[0], "has been removed")
+
+        with open("profiles_genBy4o/%d_%s.txt"%(i, s[name]['URGENCY_LEVEL']), "w") as file:
             file.write(ret)
         del(graph)
         del(workflow)
